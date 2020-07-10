@@ -1,0 +1,51 @@
+version: '3'
+services:
+  mysql:
+    container_name: mysql_aptos
+    build: .
+    hostname: mysql_aptos
+    restart: always
+    environment:
+      MYSQL_DATABASE: auth
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+    networks:
+      - interdb
+  dev-front:
+    container_name: dev-front
+    build: frontend/web/.
+    ports:
+      - "8081:8081"
+    tty: true
+    links:
+      - dev-auth
+    networks:
+      - app
+      - inter
+  dev-auth:
+    container_name: dev-auth
+    hostname: dev-auth
+    build: authservice/auth-app/.
+    ports:
+    - "8088:8088"
+    tty: true
+    links:
+      - mysql
+    depends_on:
+      - mysql
+    networks:
+      - inter
+      - interdb
+networks:
+  app:
+    driver: bridge
+  inter:
+    driver: bridge
+    internal: true
+  interdb:
+    driver: bridge
+    internal: true
